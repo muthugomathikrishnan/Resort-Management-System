@@ -148,8 +148,8 @@
         $insertQuery->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
         
         // Display reservation confirmation
-        
-	header("Location: roomselection.html");
+        echo "<p>Reservation Successful!</p>";
+	header("Location:transaction.php");
 	
         exit();
     }
