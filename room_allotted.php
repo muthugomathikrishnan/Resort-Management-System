@@ -12,11 +12,36 @@ try {
 }
 
 function insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $db) {
-    $stmt = $db->prepare("
-        INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
-        VALUES (?, ?, ?, ?, ?, ?)
+    if (!isRoomBooked($room_id, $checkin_date, $checkout_date, $db)) {
+        $stmt = $db->prepare("
+            INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
+
+        echo "<p>Reservation Successful!</p>";
+        echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/transaction.php';</script>";
+        exit();
+    } else {
+        echo "<p>Sorry, the room is already booked for the specified date range.</p>";
+    }
+}
+
+function isRoomBooked($room_id, $checkin_date, $checkout_date, $db) {
+    $query = $db->prepare("
+        SELECT COUNT(*) as count
+        FROM reservation
+        WHERE room_id = ? 
+            AND (
+                (check_in_date <= ? AND check_out_date >= ?)
+                OR (check_in_date <= ? AND check_out_date >= ?)
+                OR (check_in_date >= ? AND check_out_date <= ?)
+            )
     ");
-    $stmt->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
+    $query->execute([$room_id, $checkin_date, $checkin_date, $checkout_date, $checkout_date, $checkin_date, $checkout_date]);
+    $result = $query->fetch(PDO::FETCH_ASSOC);
+
+    return $result['count'] > 0;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -28,10 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $total_payment = $_POST['total_payment'];
 
     insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $db);
-
-    echo "<p>Reservation Successful!</p>";
-    echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/transaction.php';</script>";
-    exit();
 }
 ?>
 
