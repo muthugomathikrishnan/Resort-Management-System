@@ -22,8 +22,6 @@ function insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $n
         echo "<p>Reservation Successful!</p>";
         echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/transaction.php';</script>";
         exit();
-    } else {
-        echo "<p>Sorry, the room is already booked for the specified date range.</p>";
     }
 }
 
@@ -109,6 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             width: 100%;
         }
+
+        .error-message {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -168,6 +170,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "</form>";
     } else {
         echo "<p>No information available for this room.</p>";
+    }
+    
+    // Display error message if the room is already booked
+    if (isset($_POST['user_id']) && isRoomBooked($_POST['room_id'], $_POST['checkin_date'], $_POST['checkout_date'], $db)) {
+        echo "<p class='error-message'>Sorry, the room is already booked for the selected dates.</p>";
     }
     ?>
 </div>
