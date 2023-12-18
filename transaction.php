@@ -1,14 +1,62 @@
-<!-- transaction_details.php -->
+<?php
+$host = 'resortmanagement.postgres.database.azure.com';
+$dbname = 'project';
+$user = 'resort';
+$password = 'Muthu@2004';
+
+try {
+    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
+}
+
+// Retrieve user_id from the users table
+$userQuery = $pdo->prepare("
+    SELECT user_id
+    FROM users
+    WHERE user_id = (SELECT MAX(user_id) FROM users)
+");
+$userQuery->execute();
+$userDetails = $userQuery->fetch(PDO::FETCH_ASSOC);
+
+if ($userDetails) {
+    $user_id = $userDetails['user_id'];
+
+    // Handle form submission
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        // Get form data
+        $payment_method = $_POST["payment_method"];
+        $card_number = $_POST["card_number"];
+        $expiry_date = $_POST["expiry_date"];
+        $cvv = $_POST["cvv"];
+
+        // Insert transaction details into the payment_method table
+        $insertQuery = $pdo->prepare("
+            INSERT INTO payment_method (user_id, payment_method, card_number, expiry_date, cvv)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $insertQuery->execute([$user_id, $payment_method, $card_number, $expiry_date, $cvv]);
+
+        // Redirect to successful.html
+        echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/successful.php';</script>";
+        exit();
+    }
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction Details</title>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('https://www.paisabazaar.com/wp-content/uploads/2018/08/credit-card-fee-768x511.jpg'); /* Replace with your image URL */
+            background-image: url('https://www.paisabazaar.com/wp-content/uploads/2018/08/credit-card-fee-768x511.jpg');
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -59,51 +107,7 @@
     <h2>Transaction Details</h2>
     
     <?php
-    // Include your PostgreSQL connection code here
-    $host = 'resortmanagement.postgres.database.azure.com';
-    $dbname = 'project';
-    $user = 'resort';
-    $password = 'Muthu@2004';
-
-    try {
-        $db = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        die("Connection failed: " . $e->getMessage());
-    }
-
-    // Retrieve user_id from the users table
-    $userQuery = $db->prepare("
-        SELECT user_id
-        FROM users
-        WHERE user_id = (SELECT MAX(user_id) FROM users)
-    ");
-    $userQuery->execute();  
-    $userDetails = $userQuery->fetch(PDO::FETCH_ASSOC);
-
     if ($userDetails) {
-        $user_id = $userDetails['user_id'];
-
-        // Handle form submission
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            // Get form data
-            $payment_method = $_POST["payment_method"];
-            $card_number = $_POST["card_number"];
-            $expiry_date = $_POST["expiry_date"];
-            $cvv = $_POST["cvv"];
-
-            // Insert transaction details into the payment_method table
-            $insertQuery = $db->prepare("
-                INSERT INTO payment_method (user_id, payment_method, card_number, expiry_date, cvv)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            $insertQuery->execute([$user_id, $payment_method, $card_number, $expiry_date, $cvv]);
-
-            // Redirect to successful.html
-            header("Location: successful.php");
-            exit();
-        }
-
         // Display the form
         echo "<form method='post'>";
         echo "<label for='payment_method'>Payment Method:</label>";
@@ -122,9 +126,4 @@
         echo "</form>";
     } else {
         echo "<p>User not found or not specified.</p>";
-    }
-    ?>
-</div>
-
-</body>
-</html>
+   
