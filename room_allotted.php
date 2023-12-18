@@ -70,27 +70,6 @@
         die("Connection failed: " . $e->getMessage());
     }
 
-    // Check if the form is submitted
-    if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $user_id = $_POST["user_id"];
-        $room_id = $_POST["room_id"];
-        $checkin_date = $_POST["checkin_date"];
-        $checkout_date = $_POST["checkout_date"];
-        $number_of_days = $_POST["number_of_days"];
-        $total_payment = $_POST["total_payment"];
-
-        // Insert reservation information into the reservations table
-        $insertQuery = $db->prepare("
-            INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
-        $insertQuery->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
-
-        // Redirect to transaction.php after successful storage
-        header("Location: transction.php");
-        exit();
-    }
-
     // Retrieve room name from the URL parameter
     $room_name = isset($_GET['room_name']) ? $_GET['room_name'] : '';
 
@@ -125,39 +104,59 @@
         } else {
             echo "<p>User not found or not specified.</p>";
         }
-    ?>
-    
-    <!-- HTML Form -->
-    <form method="post" action="transaction.php">
-        <input type="hidden" name="user_id" value="<?= $userDetails['user_id'] ?>">
-        <input type="hidden" name="room_id" value="<?= $roomDetails['room_id'] ?>">
-        <input type="hidden" id="rate" name="rate" value="<?= $roomDetails['price_per_night'] ?>">
-        <label for="checkin_date">Check-in Date:</label>
-        <input style="color:black" type="date" name="checkin_date" required><br>
-        <label for="checkout_date">Check-out Date:</label>
-        <input style="color:black" type="date" name="checkout_date" required><br>
-        <label for="number_of_days">Number of Days:</label>
-        <input style="color:black" type="text" id="days" name="number_of_days" onchange="calc()" required><br>
-        <label for="total_payment">Total Payment:</label>
-        <input style="color:black" type="text" id="payment" name="total_payment" required><br>
-        <input type="submit" value="Proceed payment">
-    </form>
 
-    <!-- JavaScript Calculation -->
-    <script>
-        function calc() {
-            var a = document.getElementById('days').value;
-            var b = document.getElementById('rate').value;
-            document.getElementById('payment').value = a * b;
+        // Reservation form
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='user_id' value='{$userDetails['user_id']}'>";
+        echo "<input type='hidden' name='room_id' value='{$roomDetails['room_id']}'>";
+        echo "<input type='hidden' id='rate' name='rate' value='{$roomDetails['price_per_night']}'>";
+        echo "<label for='checkin_date'>Check-in Date:</label>";
+        echo "<input style='color:black' type='date' name='checkin_date' required><br>";
+        echo "<label for='checkout_date'>Check-out Date:</label>";
+        echo "<input style='color:black' type='date' name='checkout_date' required><br>";
+        echo "<label for='number_of_days'>Number of Days:</label>";
+        echo "<input style='color:black' type='text' id='days' name='number_of_days' onchange='calc()' required><br>";
+        echo "<label for='total_payment'>Total Payment:</label>";
+        echo "<input style='color:black' type='text' id='payment' name='total_payment' required><br>";
+        echo "<input type='submit' value='Proceed payment'>";
+        echo "<script>
+        function calc(){
+            var a=document.getElementById('days').value;
+            var b=document.getElementById('rate').value;
+            document.getElementById('payment').value= a*b;
         }
-    </script>
-
-    <?php
+        </script>";
+        echo "</form>";
     } else {
         echo "<p>No information available for this room.</p>";
     }
+
+    // Check if the form is submitted
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $user_id = $_POST["user_id"];
+        $room_id = $_POST["room_id"];
+        $checkin_date = $_POST["checkin_date"];
+        $checkout_date = $_POST["checkout_date"];
+        $number_of_days = $_POST["number_of_days"];
+        $total_payment = $_POST["total_payment"];
+
+        // Insert reservation information into the reservations table
+        $insertQuery = $db->prepare("
+            INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $insertQuery->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
+        
+        // Display reservation confirmation
+        echo "<p>Reservation Successful!</p>";
+	    header("Location:https://resortmanagement.azurewebsites.net/transaction.php");
+	
+        exit();
+    }
+     
     ?>
 </div>
 
 </body>
 </html>
+    
