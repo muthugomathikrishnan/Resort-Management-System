@@ -126,4 +126,10 @@ if ($userDetails) {
         echo "</form>";
     } else {
         echo "<p>User not found or not specified.</p>";
+         }
+    ?>
+</div>
+
+</body>
+</html>
    
