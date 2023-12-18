@@ -149,8 +149,8 @@
         
         // Display reservation confirmation
         echo "<p>Reservation Successful!</p>";
-	
 	header("Location: transaction.php");
+	
         exit();
     }
      
