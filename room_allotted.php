@@ -149,7 +149,7 @@
         
         // Display reservation confirmation
         echo "<p>Reservation Successful!</p>";
-	    header("Location:https://resortmanagement.azurewebsites.net/transaction.php");
+	header("Location:https://resortmanagement.azurewebsites.net/transaction.php");
 	
         exit();
     }
