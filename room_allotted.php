@@ -4,10 +4,15 @@ $dbname = 'project';
 $user = 'resort';
 $password = 'Muthu@2004';
 
-$pdo = new PDO("pgsql:host=$host;dbname=$dbname;user=$user;password=$password");
+try {
+    $db = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
+}
 
-function insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $pdo) {
-    $stmt = $pdo->prepare("
+function insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $db) {
+    $stmt = $db->prepare("
         INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
         VALUES (?, ?, ?, ?, ?, ?)
     ");
@@ -22,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $number_of_days = $_POST['number_of_days'];
     $total_payment = $_POST['total_payment'];
 
-    insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $pdo);
+    insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $db);
 
     echo "<p>Reservation Successful!</p>";
     echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/transaction.php';</script>";
@@ -89,18 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="allotted-container">
     <?php
-    $host = 'resortmanagement.postgres.database.azure.com';
-    $dbname = 'project';
-    $user = 'resort';
-    $password = 'Muthu@2004';
-
-    try {
-        $db = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        die("Connection failed: " . $e->getMessage());
-    }
-
     $room_name = isset($_GET['room_name']) ? $_GET['room_name'] : '';
 
     echo "<h2>{$room_name}</h2>";
@@ -154,21 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "</form>";
     } else {
         echo "<p>No information available for this room.</p>";
-    }
-
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $user_id = $_POST["user_id"];
-        $room_id = $_POST["room_id"];
-        $checkin_date = $_POST["checkin_date"];
-        $checkout_date = $_POST["checkout_date"];
-        $number_of_days = $_POST["number_of_days"];
-        $total_payment = $_POST["total_payment"];
-
-        insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $db);
-
-        echo "<p>Reservation Successful!</p>";
-        echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/transaction.php';</script>";
-        exit();
     }
     ?>
 </div>
