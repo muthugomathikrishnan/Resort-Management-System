@@ -1,0 +1,114 @@
+<!-- PHP code remains unchanged -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Head content remains unchanged -->
+</head>
+
+<body>
+    <!-- Navigation bar and other HTML content remain unchanged -->
+
+    <section class="roomlistrating" id="roomlistrating">
+        <div class="faq-container">
+            <h2>Frequently Asked Questions</h2>
+            <div class="question">
+                <h3>Q1: Show all users </h3>
+                <button class="btn" onmouseover="showUsers()" id="q1">Answer</button>
+                <!-- Container to display user names -->
+                <div class="answer-container" id="answerContainer1"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="question">
+        <h3>Q1: show the all users reservation date </h3>
+        <button class="btn" onmouseover="showReservations()" id="q2">Answer</button>
+        <!-- Container to display user reservations -->
+        <div class="answer-container" id="answerContainer2"></div>
+    </div>
+
+    <!-- Other sections and content remain unchanged -->
+
+    <script>
+        function showUsers() {
+            // Fetched user names from PHP (passed as JSON)
+            var userNames = <?php echo json_encode($userNames); ?>;
+
+            // Create an HTML table to display user names
+            var answerContainer = document.getElementById('answerContainer1');
+            var tableHTML = "<h3>Answer:</h3><table border='1'><tr><th>User Names</th></tr>";
+
+            // Add each user name to the table
+            userNames.forEach(function (name) {
+                tableHTML += "<tr><td>" + name + "</td></tr>";
+            });
+
+            // Close the table HTML
+            tableHTML += "</table>";
+
+            // Set the HTML content to the answer container
+            answerContainer.innerHTML = tableHTML;
+
+            // Show the answer container
+            answerContainer.style.display = 'block';
+
+            // Attach event listener to hide the answer when the mouse leaves the button
+            document.addEventListener('mouseleave', hideUsers);
+        }
+
+        function hideUsers() {
+            var answerContainer = document.getElementById('answerContainer1');
+            answerContainer.style.display = 'none';
+
+            // Remove the event listener after hiding the answer
+            document.removeEventListener('mouseleave', hideUsers);
+        }
+
+        function showReservations() {
+            // Fetched user reservations from PHP (passed as JSON)
+            var userReservations = <?php echo json_encode($userReservations); ?>;
+
+            // Create an HTML table to display user reservations
+            var answerContainer = document.getElementById('answerContainer2');
+            var tableHTML = "<h3>Answer:</h3><table border='1'><tr><th>User Name</th><th>Check-in Date</th><th>Check-out Date</th></tr>";
+
+            // Add each user reservation to the table
+            userReservations.forEach(function (entry) {
+                tableHTML += "<tr><td>" + entry.username + "</td><td>" + entry.check_in_date + "</td><td>" + entry.check_out_date + "</td></tr>";
+            });
+
+            // Close the table HTML
+            tableHTML += "</table>";
+
+            // Set the HTML content to the answer container
+            answerContainer.innerHTML = tableHTML;
+
+            // Show the answer container
+            answerContainer.style.display = 'block';
+
+            // Attach event listener to hide the answer when the mouse leaves the button
+            document.addEventListener('mouseleave', hideReservations);
+        }
+
+        function hideReservations() {
+            var answerContainer = document.getElementById('answerContainer2');
+            answerContainer.style.display = 'none';
+
+            // Remove the event listener after hiding the answer
+            document.removeEventListener('mouseleave', hideReservations);
+        }
+
+        // Attach event listeners to the "Answer" buttons for mouseover events
+        var answerButton1 = document.getElementById('q1');
+        answerButton1.addEventListener('mouseover', showUsers);
+
+        var answerButton2 = document.getElementById('q2');
+        answerButton2.addEventListener('mouseover', showReservations);
+    </script>
+
+    <!-- Other scripts and closing body/html tags remain unchanged -->
+</body>
+
+</html>
