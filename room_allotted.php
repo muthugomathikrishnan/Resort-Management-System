@@ -1,10 +1,42 @@
-<!-- room_allotted.php -->
+<?php
+$host = 'resortmanagement.postgres.database.azure.com';
+$dbname = 'project';
+$user = 'resort';
+$password = 'Muthu@2004';
+
+$pdo = new PDO("pgsql:host=$host;dbname=$dbname;user=$user;password=$password");
+
+function insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $pdo) {
+    $stmt = $pdo->prepare("
+        INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_id = $_POST['user_id'];
+    $room_id = $_POST['room_id'];
+    $checkin_date = $_POST['checkin_date'];
+    $checkout_date = $_POST['checkout_date'];
+    $number_of_days = $_POST['number_of_days'];
+    $total_payment = $_POST['total_payment'];
+
+    insertReservation($user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment, $pdo);
+
+    echo "<p>Reservation Successful!</p>";
+    echo "<script>window.location.href='https://resortmanagement.azurewebsites.net/transaction.php';</script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Allotted</title>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,7 +89,6 @@
 
 <div class="allotted-container">
     <?php
-    // Include your PostgreSQL connection code here
     $host = 'resortmanagement.postgres.database.azure.com';
     $dbname = 'project';
     $user = 'resort';
@@ -70,13 +101,10 @@
         die("Connection failed: " . $e->getMessage());
     }
 
-    // Retrieve room name from the URL parameter
     $room_name = isset($_GET['room_name']) ? $_GET['room_name'] : '';
 
-    // Display room name as heading
     echo "<h2>{$room_name}</h2>";
 
-    // Retrieve room details and price
     $query = $db->prepare("
         SELECT room_id, price_per_night
         FROM roomlist
@@ -86,77 +114,18 @@
     $roomDetails = $query->fetch(PDO::FETCH_ASSOC);
 
     if ($roomDetails) {
-        // Display room details and price
         echo "<p>Room ID: {$roomDetails['room_id']}</p>";
         echo "<p>Price per Night: {$roomDetails['price_per_night']}</p>";
 
-        // Display user_id
         $userQuery = $db->prepare("
              SELECT user_id, username
              FROM users
              WHERE user_id = (SELECT MAX(user_id) FROM users)
         ");
-        $userQuery->execute();  // Adjust the WHERE clause as per your requirements
+        $userQuery->execute();
         $userDetails = $userQuery->fetch(PDO::FETCH_ASSOC);
 
         if ($userDetails) {
             echo "<p>User ID: {$userDetails['user_id']}</p>";
         } else {
-            echo "<p>User not found or not specified.</p>";
-        }
-
-        // Reservation form
-        echo "<form method='post'>";
-        echo "<input type='hidden' name='user_id' value='{$userDetails['user_id']}'>";
-        echo "<input type='hidden' name='room_id' value='{$roomDetails['room_id']}'>";
-        echo "<input type='hidden' id='rate' name='rate' value='{$roomDetails['price_per_night']}'>";
-        echo "<label for='checkin_date'>Check-in Date:</label>";
-        echo "<input style='color:black' type='date' name='checkin_date' required><br>";
-        echo "<label for='checkout_date'>Check-out Date:</label>";
-        echo "<input style='color:black' type='date' name='checkout_date' required><br>";
-        echo "<label for='number_of_days'>Number of Days:</label>";
-        echo "<input style='color:black' type='text' id='days' name='number_of_days' onchange='calc()' required><br>";
-        echo "<label for='total_payment'>Total Payment:</label>";
-        echo "<input style='color:black' type='text' id='payment' name='total_payment' required><br>";
-        echo "<input type='submit' value='Proceed payment'>";
-        echo "<script>
-        function calc(){
-            var a=document.getElementById('days').value;
-            var b=document.getElementById('rate').value;
-            document.getElementById('payment').value= a*b;
-        }
-        </script>";
-        echo "</form>";
-    } else {
-        echo "<p>No information available for this room.</p>";
-    }
-
-    // Check if the form is submitted
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $user_id = $_POST["user_id"];
-        $room_id = $_POST["room_id"];
-        $checkin_date = $_POST["checkin_date"];
-        $checkout_date = $_POST["checkout_date"];
-        $number_of_days = $_POST["number_of_days"];
-        $total_payment = $_POST["total_payment"];
-
-        // Insert reservation information into the reservations table
-        $insertQuery = $db->prepare("
-            INSERT INTO reservation (user_id, room_id, check_in_date, check_out_date, num_of_days, total_payment)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
-        $insertQuery->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
-        
-        // Display reservation confirmation
-        echo "<p>Reservation Successful!</p>";
-	header("Location:https://resortmanagement.azurewebsites.net/transaction.php");
-	
-        exit();
-    }
-     
-    ?>
-</div>
-
-</body>
-</html>
-    
+            echo "<p>User not found or not specified.</
