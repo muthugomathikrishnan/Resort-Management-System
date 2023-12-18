@@ -71,7 +71,7 @@
     }
 
     // Check if the form is submitted
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $user_id = $_POST["user_id"];
         $room_id = $_POST["room_id"];
         $checkin_date = $_POST["checkin_date"];
@@ -128,7 +128,7 @@
     ?>
     
     <!-- HTML Form -->
-    <form method="post">
+    <form method="post" action="">
         <input type="hidden" name="user_id" value="<?= $userDetails['user_id'] ?>">
         <input type="hidden" name="room_id" value="<?= $roomDetails['room_id'] ?>">
         <input type="hidden" id="rate" name="rate" value="<?= $roomDetails['price_per_night'] ?>">
