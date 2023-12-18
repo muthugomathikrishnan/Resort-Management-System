@@ -87,7 +87,7 @@
         $insertQuery->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
 
         // Redirect to transaction.php after successful storage
-        header("Location: transaction.php");
+        header("Location: roomselection.html");
         exit();
     }
 
