@@ -87,7 +87,7 @@
         $insertQuery->execute([$user_id, $room_id, $checkin_date, $checkout_date, $number_of_days, $total_payment]);
 
         // Redirect to transaction.php after successful storage
-        header("Location: roomselection.html");
+        header("Location: transction.php");
         exit();
     }
 
@@ -128,7 +128,7 @@
     ?>
     
     <!-- HTML Form -->
-    <form method="post" action="">
+    <form method="post" action="transaction.php">
         <input type="hidden" name="user_id" value="<?= $userDetails['user_id'] ?>">
         <input type="hidden" name="room_id" value="<?= $roomDetails['room_id'] ?>">
         <input type="hidden" id="rate" name="rate" value="<?= $roomDetails['price_per_night'] ?>">
