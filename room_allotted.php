@@ -125,11 +125,6 @@
             var b=document.getElementById('rate').value;
             document.getElementById('payment').value= a*b;
         }
-        
-        // Redirect to transaction.php using JavaScript
-        document.querySelector('form').addEventListener('submit', function() {
-            window.location.href = 'transaction.php';
-        });
         </script>";
         echo "</form>";
     } else {
@@ -154,7 +149,11 @@
         
         // Display reservation confirmation
         echo "<p>Reservation Successful!</p>";
+	    header("Location:transaction.php");
+	
+        exit();
     }
+     
     ?>
 </div>
 
