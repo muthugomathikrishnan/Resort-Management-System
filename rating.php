@@ -1,6 +1,6 @@
 <?php
 // Include your PostgreSQL connection code here
-$$host = 'resortmanagement.postgres.database.azure.com';
+$host = 'resortmanagement.postgres.database.azure.com';
 $dbname = 'project';
 $user = 'resort';
 $password = 'Muthu@2004';
