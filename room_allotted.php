@@ -147,26 +147,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<p>User not found or not specified.</p>";
         }
 
-        echo "<form method='post'>";
+        echo "<form method='post' onsubmit='return validateDates()'>";
         echo "<input type='hidden' name='user_id' value='{$userDetails['user_id']}'>";
         echo "<input type='hidden' name='room_id' value='{$roomDetails['room_id']}'>";
         echo "<input type='hidden' id='rate' name='rate' value='{$roomDetails['price_per_night']}'>";
         echo "<label for='checkin_date'>Check-in Date:</label>";
-        echo "<input style='color:black' type='date' name='checkin_date' required><br>";
+        echo "<input style='color:black' type='date' name='checkin_date' id='checkin_date' onchange='calc()' required><br>";
         echo "<label for='checkout_date'>Check-out Date:</label>";
-        echo "<input style='color:black' type='date' name='checkout_date' required><br>";
+        echo "<input style='color:black' type='date' name='checkout_date' id='checkout_date' onchange='calc()' required><br>";
         echo "<label for='number_of_days'>Number of Days:</label>";
-        echo "<input style='color:black' type='text' id='days' name='number_of_days' onchange='calc()' required><br>";
+        echo "<input style='color:black' type='text' id='days' name='number_of_days' readonly required><br>";
         echo "<label for='total_payment'>Total Payment:</label>";
-        echo "<input style='color:black' type='text' id='payment' name='total_payment' required><br>";
+        echo "<input style='color:black' type='text' id='payment' name='total_payment' readonly required><br>";
         echo "<input type='submit' value='Proceed payment'>";
         echo "<script>
-        function calc(){
-            var a=document.getElementById('days').value;
-            var b=document.getElementById('rate').value;
-            document.getElementById('payment').value= a*b;
-        }
+            function calc(){
+                var a = document.getElementById('checkin_date').value;
+                var b = document.getElementById('checkout_date').value;
+                var diffInMs = new Date(b) - new Date(a);
+                var diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+                document.getElementById('days').value = diffInDays;
+                document.getElementById('payment').value = diffInDays * document.getElementById('rate').value;
+            }
+            function validateDates() {
+                var checkinDate = new Date(document.getElementById('checkin_date').value);
+                var checkoutDate = new Date(document.getElementById('checkout_date').value);
+                if (checkoutDate <= checkinDate) {
+                    alert('Check-out date must be greater than Check-in date.');
+                    return false;
+                }
+                return true;
+            }
         </script>";
+        
         echo "</form>";
     } else {
         echo "<p>No information available for this room.</p>";
