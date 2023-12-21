@@ -12,6 +12,28 @@ function insertUser($username, $password, $email, $phoneNo, $age, $gender, $acti
     $stmt->execute([$username, $password, $email, $phoneNo, $age, $gender, $activity]);
 }
 
+// Function to check if the combination of username and password already exists
+function userExists($username, $password, $pdo) {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? AND password = ?");
+    $stmt->execute([$username, $password]);
+    return $stmt->fetchColumn() > 0;
+}
+
+// Function to validate age
+function isValidAge($age) {
+    return filter_var($age, FILTER_VALIDATE_INT, array("options" => array("min_range" => 1, "max_range" => 100))) !== false;
+}
+
+// Function to validate phone number
+function isValidPhoneNumber($phoneNo) {
+    return preg_match("/^\d{10}$/", $phoneNo);
+}
+
+// Function to validate email
+function isValidEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false && strpos($email, '.com', strlen($email) - 4) !== false;
+}
+
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve form data
@@ -23,12 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gender = $_POST['gender'];
     $activity = $_POST['activity'];
 
-    // Insert user data into the database
-    insertUser($username, $password, $email, $phoneNo, $age, $gender, $activity, $pdo);
+    // Validate age, phone number, and email
+    if (!isValidAge($age)) {
+        echo '<script>alert("Invalid age. Please enter a valid age between 1 and 100.");</script>';
+    } elseif (!isValidPhoneNumber($phoneNo)) {
+        echo '<script>alert("Invalid phone number. Please enter a 10-digit phone number.");</script>';
+    } elseif (!isValidEmail($email)) {
+        echo '<script>alert("Invalid email. Please enter a valid email address ending with \'.com\'.");</script>';
+    } elseif (userExists($username, $password, $pdo)) {
+        echo '<script>alert("Username and password combination already exists. Please choose a different username or password.");</script>';
+    } else {
+        // Insert user data into the database
+        insertUser($username, $password, $email, $phoneNo, $age, $gender, $activity, $pdo);
 
-    // Redirect to roomselection.html
-    header("Location: roomselection.html");
-    exit();
+        // Redirect to roomselection.html
+        header("Location: roomselection.html");
+        exit();
+    }
 }
 ?>
 
@@ -73,12 +106,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 4px;
             cursor: pointer;
         }
-       a{
-        text-decoration:none;
-        color:white;
-       }
         
-        
+        a {
+            text-decoration: none;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="number" id="phone_no" name="phone_no" required>
 
         <label for="age">Age:</label>
-        <input type="number" id="age" name="age" required>
+        <input type="number" id="age" name="age" required min="1" max="100">
 
         <label for="gender">Gender:</label>
         <select id="gender" name="gender" required>
@@ -119,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Submit</button>
     </form>
         
-<button><a href="ap_resort.html">Back</a></button>
+    <button><a href="ap_resort.html">Back</a></button>
 
 </body>
 </html>
